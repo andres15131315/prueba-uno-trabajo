@@ -45,6 +45,10 @@
             border: 1px solid #ccc;
         }
 
+        input[type="date"] {
+            cursor: pointer;
+        }
+
         button {
             background-color: #39A900;
             color: white;
@@ -138,52 +142,58 @@
 @csrf
 
 <label>Fecha:</label>
-<input type="date" name="fecha">
+<input type="date" name="fecha" value="{{ old('fecha') }}">
 
 <label>N° Radicado:</label>
-<input type="text" name="numero_radicado">
+<input type="text" name="numero_radicado" value="{{ old('numero_radicado') }}">
 
 <label>Objeto de la Solicitud:</label>
-<textarea name="objeto_solicitud"></textarea>
+<textarea name="objeto_solicitud">{{ old('objeto_solicitud') }}</textarea>
 
 <label>Remitente:</label>
-<input type="text" name="remitente">
+<input type="text" name="remitente" value="{{ old('remitente') }}">
 
 <label>Cargo:</label>
-<input type="text" name="cargo">
+<input type="text" name="cargo" value="{{ old('cargo') }}">
 
 <label>Empresa:</label>
-<input type="text" name="empresa">
+<input type="text" name="empresa" value="{{ old('empresa') }}">
 
 <label>Correo:</label>
-<input type="email" name="correo">
+<input type="email" name="correo" value="{{ old('correo') }}">
 
 <label>Contacto:</label>
-<input type="text" name="contacto">
+<input type="text" name="contacto" value="{{ old('contacto') }}">
 
 <label>Municipio:</label>
-<input type="text" name="municipio">
+<input type="text" name="municipio" value="{{ old('municipio') }}">
 
 <label>Radicado Respuesta:</label>
-<input type="text" name="radicado_respuesta">
+<input type="text" name="radicado_respuesta" value="{{ old('radicado_respuesta') }}">
 
 <label>Fecha Radicación Respuesta:</label>
-<input type="date" name="fecha_radicacion_respuesta">
+<input type="date" name="fecha_radicacion_respuesta" value="{{ old('fecha_radicacion_respuesta') }}">
 
 <label>Síntesis de Respuesta:</label>
-<textarea name="sintesis_respuesta"></textarea>
+<textarea name="sintesis_respuesta">{{ old('sintesis_respuesta') }}</textarea>
 
 <label>Observaciones:</label>
-<textarea name="observaciones"></textarea>
+<textarea name="observaciones">{{ old('observaciones') }}</textarea>
 
 <label>Agenda Reuniones:</label>
-<input type="text" name="agenda_reuniones">
+<input type="text" name="agenda_reuniones" value="{{ old('agenda_reuniones') }}">
 
 <label>Compromiso:</label>
-<textarea name="compromiso"></textarea>
+<textarea name="compromiso">{{ old('compromiso') }}</textarea>
 
 <label>Fecha de Vencimiento:</label>
-<input type="date" name="fecha_vencimiento">
+<input type="date" name="fecha_vencimiento" value="{{ old('fecha_vencimiento') }}">
+
+<a href="{{ route('solicitudes.export') }}">
+    <button type="button" style="background-color:#39A900;color:white;padding:8px 15px;border:none;border-radius:5px;cursor:pointer;margin-bottom:15px;">
+        Exportar a Excel (CSV)
+    </button>
+</a>
 
 <button type="submit">Guardar Solicitud</button>
 
@@ -218,9 +228,8 @@
 
 @forelse($solicitudes as $index => $s)
 <tr>
-
 <td>{{ $index + 1 }}</td>
-<td>{{ $s->fecha }}</td>
+<td>{{ $s->fecha ? \Carbon\Carbon::parse($s->fecha)->format('Y-m-d') : '' }}</td>
 <td>{{ $s->numero_radicado }}</td>
 <td>{{ $s->objeto_solicitud }}</td>
 <td>{{ $s->remitente }}</td>
@@ -230,7 +239,7 @@
 <td>{{ $s->contacto }}</td>
 <td>{{ $s->municipio }}</td>
 <td>{{ $s->radicado_respuesta }}</td>
-<td>{{ $s->fecha_radicacion_respuesta }}</td>
+<td>{{ $s->fecha_radicacion_respuesta ? \Carbon\Carbon::parse($s->fecha_radicacion_respuesta)->format('Y-m-d') : '' }}</td>
 <td>{{ $s->sintesis_respuesta }}</td>
 <td>{{ $s->observaciones }}</td>
 <td>{{ $s->agenda_reuniones }}</td>
@@ -239,9 +248,7 @@
 <td>
 @php
     $hoy = \Carbon\Carbon::now();
-    $vencimiento = $s->fecha_vencimiento 
-        ? \Carbon\Carbon::parse($s->fecha_vencimiento)
-        : null;
+    $vencimiento = $s->fecha_vencimiento ? \Carbon\Carbon::parse($s->fecha_vencimiento) : null;
 @endphp
 
 @if($vencimiento)
@@ -257,29 +264,19 @@
         <span style="color:green;font-weight:bold;">🟢 VIGENTE</span>
     @endif
 
-    <br>
-    {{ $s->fecha_vencimiento }}
+    <br>{{ $vencimiento->format('Y-m-d') }}
 @else
     Sin fecha
 @endif
 </td>
 
 <td>
-<a href="{{ route('solicitudes.edit', $s->id) }}" class="btn-edit">
-Editar
-</a>
+<a href="{{ route('solicitudes.edit', $s->id) }}" class="btn-edit">Editar</a>
 
-<form action="{{ route('solicitudes.destroy', $s->id) }}" 
-      method="POST" 
-      style="display:inline;">
+<form action="{{ route('solicitudes.destroy', $s->id) }}" method="POST" style="display:inline;">
 @csrf
 @method('DELETE')
-
-<button type="submit" 
-        class="btn-delete"
-        onclick="return confirm('¿Eliminar solicitud?')">
-Eliminar
-</button>
+<button type="submit" class="btn-delete" onclick="return confirm('¿Eliminar solicitud?')">Eliminar</button>
 </form>
 </td>
 
